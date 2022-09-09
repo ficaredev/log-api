@@ -1,0 +1,69 @@
+name: Continuos Integration
+
+on:
+    pull_request:
+        branches: [ develop, master ]
+
+jobs:
+    code-analysis:
+        name: Code Analysis
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 16
+                  cache: 'npm'
+            - run: npm install
+            - run: npm run lint
+            - run: npm audit --production
+
+    unit-tests:
+        name: Unit Tests
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 16
+                  cache: 'npm'
+            - run: npm install
+            - run: npm run unit
+
+    test-coverage:
+        name: Test Coverage
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 16
+                  cache: 'npm'
+            - run: npm install
+            - run: npm run coverage
+
+    # synk:
+    #     name: Synk
+    #     runs-on: ubuntu-latest
+
+    #     steps:
+    #     - uses: actions/checkout@v3
+    #     - name: Run Snyk to check for vulnerabilities
+    #         uses: snyk/actions/node@master
+    #         env:
+    #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    #         with:
+    #         args: --severity-threshold=high
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

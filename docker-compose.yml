@@ -1,0 +1,39 @@
+version: '3'
+services:
+    # log:
+    #     build:
+    #         context: .
+    #         dockerfile: Dockerfile
+    #     image: log
+    #     env_file:
+    #         - .env
+    #     depends_on:
+    #         - mongo
+    #     networks:
+    #        - log
+    #     ports:
+    #         - 3000:3000
+
+    mongo:
+        image: mongo
+        ports:
+            - '${FORWARD_DB_PORT:-27017}:27017'
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: '${DB_USERNAME}'
+            MONGO_INITDB_ROOT_PASSWORD: '${DB_PASSWORD}'
+        volumes:
+            - 'logmongo:/data/db'
+        networks:
+            - log
+        healthcheck:
+            test: echo 'db.runCommand({serverStatus:1}).ok'
+            retries: 3
+            timeout: 5s
+
+networks:
+    log:
+        driver: bridge
+volumes:
+    logmongo:
+        driver: local
